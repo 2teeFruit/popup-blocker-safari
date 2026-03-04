@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Popup Blocker (Safari iOS simple)
 // @namespace    https://github.com/schomery/popup-blocker
-// @version      0.1.0
-// @description  Bloque les popups avec confirmation, autorise automatiquement le même origin, mémorise les refus par site, et ferme immédiatement les popups refusées.
+// @version      0.1.1
+// @description  Bloque les popups avec confirmation, autorise automatiquement le même origin, mémorise les refus par site, et ferme les popups refusées après un court délai.
 // @match        *://*/*
 // @run-at       document-start
 // @grant        none
@@ -12,6 +12,7 @@
   'use strict';
 
   const STORE_KEY = '__pb_ios_rules_v1__';
+  const POPUP_CLOSE_DELAY_MS = 300;
   const sourceOrigin = location.origin;
 
   const readRules = () => {
@@ -87,7 +88,7 @@
   const openThenClose = (originalOpen, self, args) => {
     const popup = Reflect.apply(originalOpen, self, args);
     if (popup && typeof popup.close === 'function') {
-      setTimeout(() => popup.close(), 0);
+      setTimeout(() => popup.close(), POPUP_CLOSE_DELAY_MS);
     }
     return null;
   };
@@ -124,7 +125,7 @@
     const blocked = maybeBlockElementNavigation(a.href, a.target, () => {
       const w = originalOpen.call(window, a.href, a.target || '_blank');
       if (w && typeof w.close === 'function') {
-        setTimeout(() => w.close(), 0);
+        setTimeout(() => w.close(), POPUP_CLOSE_DELAY_MS);
       }
     });
 
@@ -144,7 +145,7 @@
     const blocked = maybeBlockElementNavigation(action, form.target, () => {
       const w = originalOpen.call(window, 'about:blank', form.target || '_blank');
       if (w && typeof w.close === 'function') {
-        setTimeout(() => w.close(), 0);
+        setTimeout(() => w.close(), POPUP_CLOSE_DELAY_MS);
       }
     });
 
